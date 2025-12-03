@@ -143,7 +143,7 @@ app.post("/createriderlocation", async (req, res) => {
 
 app.post('/createaddress', async (req, res) => {
   try {
-    console.log("📦 Received payload:", req.body); // 🟢 Log incoming payload
+    console.log("📦 Received payload:", req.body);
 
     const {
       addressId,
@@ -155,7 +155,7 @@ app.post('/createaddress', async (req, res) => {
       isDefault,
       createdAt,
       latitude,
-      longitude, // ✅ Added
+      longitude,
     } = req.body;
 
     if (!addressId || !userId || !name || !municipality || !barangay) {
@@ -166,6 +166,23 @@ app.post('/createaddress', async (req, res) => {
       return res.status(400).json({ error: '❌ Missing geocoding coordinates (latitude & longitude)' });
     }
 
+    // ✅ If the new address is default, set all other addresses of the user to false
+    if (isDefault) {
+      const userAddressesSnapshot = await db
+        .collection('delivery_address')
+        .where('userId', '==', userId)
+        .where('isDefault', '==', true)
+        .get();
+
+      const batch = db.batch();
+      userAddressesSnapshot.forEach((doc) => {
+        batch.update(doc.ref, { isDefault: false, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      });
+
+      await batch.commit();
+      console.log('🔄 Previous default addresses updated to false');
+    }
+
     const newAddress = {
       addressId,
       userId,
@@ -174,8 +191,8 @@ app.post('/createaddress', async (req, res) => {
       barangay,
       addressDetails: addressDetails || '',
       isDefault: !!isDefault,
-      latitude,   // ✅ Save latitude
-      longitude,  // ✅ Save longitude
+      latitude,
+      longitude,
       createdAt: createdAt || new Date().toISOString(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
