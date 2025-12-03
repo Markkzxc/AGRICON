@@ -31,13 +31,12 @@ app.post("/send-notification", async (req, res) => {
   const { expoPushToken, title, body } = req.body;
 
   try {
-    // Send push notification via Expo
-    const response = await fetch("https://exp.host/--/api/v2/push/send", {
+    const response = await fetch("https://api.expo.dev/v2/push/send", {
       method: "POST",
       headers: {
         "Accept": "application/json",
-        "Accept-Encoding": "gzip, deflate",
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.EXPO_ACCESS_TOKEN}`, // 🔥 REQUIRED
       },
       body: JSON.stringify({
         to: expoPushToken,
@@ -47,13 +46,14 @@ app.post("/send-notification", async (req, res) => {
       }),
     });
 
-    const data = await response.json(); // ✅ parse Expo's response
-    res.status(200).json({ success: true, expoResponse: data }); // ✅ return valid JSON
+    const data = await response.json();
+    res.status(200).json({ success: true, expoResponse: data });
   } catch (error) {
     console.error("❌ Notification error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
 
 
 
