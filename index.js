@@ -31,20 +31,20 @@ app.post("/send-notification", async (req, res) => {
   const { expoPushToken, title, body } = req.body;
 
   try {
-    const response = await fetch("https://api.expo.dev/v2/push/send", {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.EXPO_ACCESS_TOKEN}`, // 🔥 REQUIRED
-      },
-      body: JSON.stringify({
-        to: expoPushToken,
-        sound: "default",
-        title,
-        body,
-      }),
-    });
+      const response = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          // no Authorization header needed
+        },
+        body: JSON.stringify({
+          to: expoPushToken,  // can be Expo Go token
+          title,
+          body,
+          sound: "default"
+        }),
+      });
 
     const data = await response.json();
     res.status(200).json({ success: true, expoResponse: data });
