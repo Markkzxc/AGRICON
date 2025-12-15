@@ -667,27 +667,6 @@ app.put('/updateproduct/:productId', async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 app.post('/register/buyer', async (req, res) => {
   try {
     console.log('✅ Received data:', req.body);
@@ -703,6 +682,7 @@ app.post('/register/buyer', async (req, res) => {
       birthday,
       validIdBase64,
       agreedToTerms,
+      expoPushToken,
     } = req.body;
 
     if (!firstName || !lastName || !email || !password || !role) {
@@ -763,6 +743,7 @@ app.post('/register/buyer', async (req, res) => {
       birthday,
       validIdUrl,
       agreedToTerms: agreedToTerms,
+      expoPushToken: expoPushToken,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -801,7 +782,8 @@ app.post('/register/seller', async (req, res) => {
       contactNumber,
       birthday,
       validIdBase64,
-      agreedToTerms, // ✅ Base64 image
+      agreedToTerms,
+      expoPushToken, // ✅ Base64 image
     } = req.body;
 
     if (!firstName || !lastName || !email || !password || !role) {
@@ -848,6 +830,7 @@ app.post('/register/seller', async (req, res) => {
       birthday,
       validIdUrl,
       agreedToTerms: agreedToTerms,
+      expoPushToken: expoPushToken,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -883,7 +866,8 @@ app.post('/register/rider', async (req, res) => {
       contactNumber,
       birthday,
       validIdBase64,
-      agreedToTerms, // ✅ Base64 image
+      agreedToTerms,
+      expoPushToken, // ✅ Base64 image
     } = req.body;
 
     if (!firstName || !lastName || !email || !password || !role) {
@@ -931,6 +915,7 @@ app.post('/register/rider', async (req, res) => {
       birthday,
       validIdUrl,
       agreedToTerms: agreedToTerms,
+      expoPushToken: expoPushToken,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
