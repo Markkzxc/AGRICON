@@ -27,6 +27,48 @@ admin.initializeApp({
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
+// ❌ Reject & Delete User (Auth + Firestore)
+app.post("/admin/reject-user", async (req, res) => {
+  try {
+    const { uid, userId } = req.body;
+
+    if (!uid || !userId) {
+      return res.status(400).json({
+        error: "uid and userId are required",
+      });
+    }
+
+    // 1️⃣ Get user from Firebase Auth (for email)
+    const authUser = await admin.auth().getUser(uid);
+    const email = authUser.email || null;
+
+    // 2️⃣ Save to rejected_users collection
+    await db.collection("rejected_users").add({
+      userId,
+      uid,
+      email,
+      rejectedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // 3️⃣ Delete Firestore user document
+    await db.collection("users").doc(userId).delete();
+
+    // 4️⃣ Delete user from Firebase Auth
+    await admin.auth().deleteUser(uid);
+
+    return res.json({
+      success: true,
+      message: "User rejected, logged, and deleted successfully",
+    });
+  } catch (error) {
+    console.error("Reject user error:", error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+
 app.post("/send-notification", async (req, res) => {
   const { expoPushToken, title, body } = req.body;
 
