@@ -27,6 +27,32 @@ admin.initializeApp({
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
+const cron = require('node-cron');
+
+// 🔹 Schedule task to run at midnight on the last day of each month
+cron.schedule('0 0 5 * *', async () => {
+  try {
+    console.log('🔔 Running taxConfig update with 5-day grace period...');
+
+    // Get all users
+    const usersSnapshot = await db.collection('users').get();
+    const batch = db.batch();
+
+    usersSnapshot.forEach((doc) => {
+      batch.update(doc.ref, {
+        taxConfig: true, // ✅ set taxConfig to true automatically
+        taxPaymentStatus: 'unpaid', // optional: mark as unpaid if needed
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    });
+
+    await batch.commit();
+    console.log('✅ taxConfig updated for all users after grace period!');
+  } catch (err) {
+    console.error('❌ Error updating taxConfig after grace period:', err);
+  }
+});
+
 // ❌ Reject & Delete User (Auth + Firestore)
 app.post("/admin/reject-user", async (req, res) => {
   try {
